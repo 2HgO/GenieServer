@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  genie_server:
+    build: .
+    command: julia --project src/main.jl
+    restart: unless-stopped
+    ports:
+      - 55099:55099
+    depends_on:
+      - mongo
+    environment: 
+      - DB_URL=mongodb://mongo:27017
+      - DB_NAME=genie_server
+      - RUN_UNSAFE=false
+      - APP_ENV=local
+      - JWT_SECRET=kjbnkwoiuhbenfko
+      - APP_PORT=55099
+  mongo:
+    image: 'mongo:4.2'
+    expose:
+      - 27017
+    volumes:
+      - mongo:/data/db
+
+volumes: 
+  mongo:

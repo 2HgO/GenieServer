@@ -5,10 +5,10 @@ using Genie
 import Genie.Router
 import HTTP
 
-# if env.envs.app_env !== "local"
-disable_logging(Info)
-disable_logging(Error)
-# end
+if !env.envs.run_unsafe
+	disable_logging(Info)
+	disable_logging(Error)
+end
 
 Genie.config.run_as_server = true
 Genie.config.server_host = "0.0.0.0"

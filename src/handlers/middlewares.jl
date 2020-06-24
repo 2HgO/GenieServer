@@ -30,3 +30,7 @@ function userValidation!(context::Dict{String,Any})
 
 	context["user"] = controllers.getUser(id)
 end
+
+function handle404(::Dict{String, Any})
+	throw(errors.NotFoundError("API endpoint not found"))
+end

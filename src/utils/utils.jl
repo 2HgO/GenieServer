@@ -87,12 +87,12 @@ function is_valid_email(email::String) :: Bool
 end
 
 function error_response(context::Dict{String,Any}, status::Int, message::String, error_type::ErrorType)
-	@printf "[GENIE-Error] :%s => %s |%s %3d %s| %11dµs | %15s |%s %-7s %s %s\n" generate_log(context, status)...
+	@printf "[GENIE-Error] :%22s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
 	Response(status, context["headers"], body ="""{"success": false, "message": "$message", "error": "$error_type"}""")
 end
 
 function ok_response(context::Dict{String,Any}, status::Int, data::String; message::String="", count::Union{UInt, Nothing}=nothing, token::Union{String, Nothing}=nothing)
-	@printf "[GENIE]       :%s => %s |%s %3d %s| %11dµs | %15s |%s %-7s %s %s\n" generate_log(context, status)...
+	@printf "[GENIE]       :%22s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
 	body = string(
 		"{",
 			"\"success\":true,",

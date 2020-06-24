@@ -28,4 +28,4 @@ Documentation for the Project can be found at [genie-server-doc](https://github.
 
 ## NOTE
 ---
-This exact sample project has ben implemented in [Go](https://golang.org) using the [Gin](https://github.com/gin-gonic/gin) web framework. Check it out over at [Gin-Server](https://github.com/2HgO/gin-server)
+This exact sample project has been implemented in [Go](https://golang.org) using the [Gin](https://github.com/gin-gonic/gin) web framework. Check it out over at [Gin-Server](https://github.com/2HgO/gin-server)

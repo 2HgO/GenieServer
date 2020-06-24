@@ -1,6 +1,7 @@
 module errors
 
-import Mongoc
+import Mongoc.BSONError
+import JSONWebTokens.InvalidSignatureError
 
 @enum ErrorType begin
 	ENTRY_NOT_FOUND = 1
@@ -97,7 +98,8 @@ Handler(err::T) where {T<:APIException} = err.code, err.context, err.type
 Handler(err::Exception) = Handler(wrap(err))
 
 wrap(err::T) where {T<:APIException} = err
-wrap(err::Mongoc.BSONError) = EntryExistsError(string(err.message))
+wrap(err::BSONError) = EntryExistsError(string(err.message))
+wrap(::InvalidSignatureError) = InvalidTokenError()
 wrap(err::TypeError) = ValidationError(string(err.context))
 wrap(::Union{MethodError, ArgumentError, EOFError}) = ValidationError()
 wrap(err::ErrorException) = FatalError(string(err.msg))

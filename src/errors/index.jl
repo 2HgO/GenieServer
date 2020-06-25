@@ -1,5 +1,3 @@
-module errors
-
 import Mongoc.BSONError
 import JSONWebTokens.InvalidSignatureError
 
@@ -104,5 +102,3 @@ wrap(err::TypeError) = ValidationError(string(err.context))
 wrap(::Union{MethodError, ArgumentError, EOFError}) = ValidationError()
 wrap(err::ErrorException) = FatalError(string(err.msg))
 wrap(::Exception) = FatalError()
-
-end

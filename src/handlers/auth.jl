@@ -20,7 +20,7 @@ function login(context::Dict{String,Any})
 	!isequal(creds.password, user.password) && throw(errors.AuthenticationError("Invalid login credentials")) # TODO: implement hash compare function
 
 	claims = Dict("user" => string(user._id), "exp" => string(now()+Day(1)))
-	encoding = HS256(envs.jwt_secret) # TODO: change this to env variable
+	encoding = HS256(var().jwt_secret) # TODO: change this to env variable
 	token = encode(encoding, claims)
 
 	utils.ok_response(context, 200, JSON2.write(user, redact=true), message="login successful", token=token)

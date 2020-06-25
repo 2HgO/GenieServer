@@ -1,6 +1,4 @@
-module handlers
-
-import env.envs
+import env.var
 import utils
 import errors
 import models
@@ -26,10 +24,14 @@ function unsafe_handler(func::Function, context::Dict{String,Any})
 	return (() -> func(context))
 end
 
+function admin_route(context::Dict{String, Any})
+	!haskey(context, "user") && throw(errors.PermissionError("Login to continue"))
+	(Int(context["user"].role) === 1) && throw(errors.PermissionError("only admins can perform this action"))
+end
+
 include("auth.jl")
 include("user.jl")
 include("middlewares.jl")
 include("watchlist.jl")
 include("category.jl")
 include("movie.jl")
-end

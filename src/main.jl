@@ -1,23 +1,23 @@
-import routes
 import env
+import routes
 import Logging: disable_logging, Info, Error
 using Genie
 import Genie.Router
 import HTTP
 
-if !env.envs.run_unsafe
+if !env.var().run_unsafe
 	disable_logging(Info)
 	disable_logging(Error)
 end
 
 Genie.config.run_as_server = true
 Genie.config.server_host = "0.0.0.0"
-Genie.config.server_port = 55099
+Genie.config.server_port = env.var().app_port
 Genie.config.cors_allowed_origins = ["*"]
 Genie.config.server_handle_static_files = false
 
 routes.SetupRoutes()
-if env.envs.app_env === "local"
+if env.var().app_env === "local"
 	for (name, route) in  Router.named_routes()
 		println("[GENIE-Local] $name => $(route.method)   $(route.path) --> $(route.action)")
 	end

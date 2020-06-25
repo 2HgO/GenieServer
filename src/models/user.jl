@@ -18,7 +18,7 @@ mutable struct User <: Model
 	password::Sensitive
 	dob::Union{Dates.Date, Nothing}
 	role::Role
-	likes::Array{Union{Mongoc.BSONObjectId, Category}}
+	likes::Array{Union{Mongoc.BSONObjectId, Category}, 1}
 	
 	function User(;
 		_id::Union{Mongoc.BSONObjectId, Nothing} = nothing,
@@ -27,10 +27,10 @@ mutable struct User <: Model
 		firstName::String,
 		lastName::String,
 		email::String,
-		password::Sensitive,
+		password::Sensitive = Sensitive(""),
 		dob::Union{Nothing, Dates.Date} = nothing,
 		role::Role,
-		likes::Array{Union{Mongoc.BSONObjectId, Category}} = Union{Mongoc.BSONObjectId, Category}[],
+		likes::Array{Union{Mongoc.BSONObjectId, Category}, 1} = Union{Mongoc.BSONObjectId, Category}[],
 		kwargs...
 	)
 		!utils.is_valid_email(email) && throw(errors.ValidationError("Invalid email"))

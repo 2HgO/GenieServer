@@ -1,5 +1,3 @@
-module utils
-
 import errors.ErrorType
 
 import Mongoc.BSONObjectId
@@ -67,9 +65,7 @@ function generate_log(context::Dict{String,Any}, status)
 	statuscol = get_status_color(status)
 	methodcol = get_method_color(method)
 
-# FORMAT: [GIN] 2020/06/23 - 23:21:11 | 404 |     781.528µs |             ::1 | GET      /users/search
-
-	name, format(stamp, "Y/m/d - H:M:S"), statuscol, status, reset, duration, client, methodcol, method, reset, path
+	name, format(stamp, "Y/mm/dd - HH:MM:SS"), statuscol, status, reset, duration, client, methodcol, method, reset, path
 end
 
 function safe_bson_id(id::AbstractString) :: Tuple{Union{BSONObjectId, Nothing}, Bool}
@@ -87,22 +83,20 @@ function is_valid_email(email::String) :: Bool
 end
 
 function error_response(context::Dict{String,Any}, status::Int, message::String, error_type::ErrorType)
-	@printf "[GENIE-Error] :%22s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
+	@printf "[GENIE-Error] :%25s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
 	Response(status, context["headers"], body ="""{"success": false, "message": "$message", "error": "$error_type"}""")
 end
 
-function ok_response(context::Dict{String,Any}, status::Int, data::String; message::String="", count::Union{UInt, Nothing}=nothing, token::Union{String, Nothing}=nothing)
-	@printf "[GENIE]       :%22s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
+function ok_response(context::Dict{String,Any}, status::Int, data::Union{String, Nothing}=nothing; message::String="", count::Union{UInt, Nothing}=nothing, token::Union{String, Nothing}=nothing)
+	@printf "[GENIE]       :%25s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
 	body = string(
 		"{",
-			"\"success\":true,",
-			"\"date\": $data ",
+			"\"success\":true",
+			data === nothing ? "" : ",\"data\": $data ",
 			message === nothing ? "" : ",\"message\": \"$message\"",
 			token === nothing ? "" : ",\"token\": \"$token\"",
 			count === nothing ? "" : ",\"count\": $count",
 		"}"
 	)
 	Response(status, context["headers"], body = body)
-end
-
 end

@@ -78,7 +78,38 @@ function getUsers(page::Int, limit::Int) :: Tuple{Array{models.User}, UInt}
 end
 
 function searchUsers(query::String, page::Int, limit::Int) :: Tuple{Array{models.User}, UInt}
-	throw(errors.NotImplementedError("no time"))
+	new_query = join(split(query), "|")
+	pipeline = [
+		Dict(
+			"\$match" => Dict(
+				"firstName" => Dict("\$regex" => "^($(new_query))", "\$options" => "i"),
+				"lastName" => Dict("\$regex" => "^($(new_query))", "\$options" => "i"),
+				"email" => Dict("\$regex" => "^($(new_query))", "\$options" => "i"),
+			),
+		),
+		Dict(
+			"\$lookup" => Dict(
+				"from" => "categories",
+				"localField" => "likes",
+				"foreignField" => "_id",
+				"as" => "likes",
+			),
+		),
+		Dict(
+			"\$sort" => Dict(
+				"createdAt" => -1,
+			),
+		),
+		Dict(
+			"\$skip" => limit*(page - 1),
+		),
+		Dict(
+			"\$limit" => limit,
+		),
+	]
+	res::Array{models.User} = aggregate(db.collections.User, BSON(pipeline), models.User)
+	count::UInt = length(db.collections.User)
+	return res, count
 end
 
 function updateUser(id::BSONObjectId, update::models.User) :: models.User
@@ -86,5 +117,5 @@ function updateUser(id::BSONObjectId, update::models.User) :: models.User
 end
 
 function deleteUser(id::BSONObjectId) :: models.User
-	throw(errors.NotImplementedError("no time"))
+	return delete_one(db.collections.User, BSON("_id" => id), models.User)
 end

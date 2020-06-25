@@ -1,9 +1,8 @@
-module routes
 import Genie.Router: route, GET, POST, PUT, PATCH, DELETE
 import Genie.Requests: matchedroute, request
 import HTTP: header, hasheader
 import handlers
-import env.envs
+import env.var
 
 import Dates
 
@@ -20,7 +19,7 @@ Endpoint(;path::String="", handlerFuncs::Tuple{Vararg{Function}}, method::String
 function load_routes(baseURL::String, endpoints::Array{Endpoint}; pre::Union{Tuple{Vararg{Function}}, Nothing}=nothing)
 	for endpoint in endpoints
 		name = ifelse(endpoint.name != Symbol(""), endpoint.name,Symbol(join(split(lowercase(endpoint.method)*"/"*endpoint.path, "/"), "_")))
-		route(merge_handlers(endpoint.handlerFuncs, pre=pre, unsafe=envs.run_unsafe), baseURL*endpoint.path, method=endpoint.method, named=name)
+		route(merge_handlers(endpoint.handlerFuncs, pre=pre, unsafe=var().run_unsafe), baseURL*endpoint.path, method=endpoint.method, named=name)
 	end
 end
 
@@ -70,12 +69,11 @@ include("watchlist.jl")
 
 function SetupRoutes()
 	for method in [GET, POST, PUT, PATCH, DELETE]
-		route(merge_handlers((handlers.handle404,), pre=(handlers.setHeaders!, handlers.setJSONHeader!), unsafe=envs.run_unsafe), ".*", method=method, named=Symbol(lowercase(method)*"_404"))
+		route(merge_handlers((handlers.handle404,), pre=(handlers.setHeaders!, handlers.setJSONHeader!), unsafe=var().run_unsafe), ".*", method=method, named=Symbol(lowercase(method)*"_404"))
 	end
 	load_routes("/users", userRoutes, pre=(handlers.setHeaders!, handlers.setJSONHeader!, handlers.userValidation!))
 	load_routes("/auth", authRoutes, pre=(handlers.setHeaders!, handlers.setJSONHeader!))
 	load_routes("/movies", movieRoutes, pre=(handlers.setHeaders!, handlers.setJSONHeader!, handlers.userValidation!))
 	load_routes("/categories", categoryRoutes, pre=(handlers.setHeaders!, handlers.setJSONHeader!, handlers.userValidation!))
 	load_routes("/watchlists", watchlistRoutes, pre=(handlers.setHeaders!, handlers.setJSONHeader!, handlers.userValidation!))
-end
 end

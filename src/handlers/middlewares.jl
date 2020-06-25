@@ -14,7 +14,7 @@ function userValidation!(context::Dict{String,Any})
 	token = string(authorization[8:end])
 	length(strip(token)) < 1 && throw(errors.InvalidTokenError("please login to continue"))
 
-	encoding = HS256(envs.jwt_secret) # TODO: change this to env variable
+	encoding = HS256(var().jwt_secret) # TODO: change this to env variable
 	claims = decode(encoding, token)
 
 	(!haskey(claims, "user") || !haskey(claims, "exp")) && throw(errors.InvalidTokenError())

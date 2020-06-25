@@ -216,9 +216,9 @@ version = "1.2.0"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "eb3e09940c0d7ae01b01d9291ebad7b081c844d3"
+git-tree-sha1 = "20ef902ea02f7000756a4bc19f7b9c24867c6211"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "1.0.5"
+version = "1.0.6"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -287,9 +287,9 @@ version = "0.4.0"
 
 [[Zlib_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "4838361eb3ba796a57457bdc183e1a128639d0ec"
+git-tree-sha1 = "33d31d2b2a24d2fdbc60633b68229ee462811c8b"
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.11+12"
+version = "1.2.11+13"
 
 [[Zstd_jll]]
 deps = ["Libdl", "Pkg"]

@@ -5,7 +5,7 @@ mutable struct Category <: Model
 	name::String
 	icon::String
 
-	function Category(;name::String, icon::String, updatedAt::Union{Dates.DateTime, Nothing}=nothing, createdAt::Union{Dates.DateTime, Nothing}=nothing, _id::Union{Mongoc.BSONObjectId, Nothing}=nothing)
+	function Category(;name::String, icon::String, updatedAt::Union{Dates.DateTime, Nothing}=nothing, createdAt::Union{Dates.DateTime, Nothing}=nothing, _id::Union{Mongoc.BSONObjectId, Nothing}=nothing, kwargs...)
 		new(_id, createdAt, updatedAt, name, icon)
 	end
 end

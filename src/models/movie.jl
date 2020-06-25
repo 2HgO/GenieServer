@@ -1,18 +1,19 @@
 mutable struct Movie <: Model
-	_id::Union{String, Nothing}
+	_id::Union{Mongoc.BSONObjectId, Nothing}
 	createdAt::Union{Dates.DateTime, Nothing}
 	updatedAt::Union{Dates.DateTime, Nothing}
 	name::String
-	categories::Array{Union{Mongoc.BSONObjectId, Category}}
+	categories::Array{Union{Mongoc.BSONObjectId, Category}, 1}
 	release::Dates.Date
 
 	function Movie(;
-		_id::Union{String, Nothing} = nothing,
+		_id::Union{Mongoc.BSONObjectId, Nothing} = nothing,
 		createdAt::Union{Dates.DateTime, Nothing} = nothing,
 		updatedAt::Union{Dates.DateTime, Nothing} = nothing,
 		name::String,
-		categories::Array{Union{Mongoc.BSONObjectId, Category}} = Union{Mongoc.BSONObjectId, Category}[],
-		release::Dates.Date
+		categories::Array{Union{Mongoc.BSONObjectId, Category}, 1},
+		release::Dates.Date,
+		kwargs...
 	)
 		new(_id, createdAt, updatedAt, name, categories, release)
 	end

@@ -92,11 +92,25 @@ struct NotImplementedError <: APIException
 	NotImplementedError(context::String = "") = new("""handler or method has not been implemented$(strip(context) == "" ? "" : ": $context")""", 501, NOT_IMPLEMENTED_ERROR)
 end
 
+
+function cstring_to_jstring(cstring::NTuple{504, UInt8})
+	s = ""
+	for c in cstring
+		c_char = Char(c)
+		if c_char == '\0'
+			break
+		else
+			s = s * c_char
+		end
+	end
+	return s
+end
+
 Handler(err::T) where {T<:APIException} = err.code, err.context, err.type
 Handler(err::Exception) = Handler(wrap(err))
 
 wrap(err::T) where {T<:APIException} = err
-wrap(err::BSONError) = EntryExistsError(string(err.message))
+wrap(err::BSONError) = FatalError(cstring_to_jstring(err.message))
 wrap(::InvalidSignatureError) = InvalidTokenError()
 wrap(err::TypeError) = ValidationError(string(err.context))
 wrap(::Union{MethodError, ArgumentError, EOFError}) = ValidationError()

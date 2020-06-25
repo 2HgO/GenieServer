@@ -88,11 +88,15 @@ function JSON2.read(io::IO, ::Type{model}; db::Bool=false, kwargs...) where {mod
 	JSON2.read(io, any; kwargs...)
 end
 
-function Base.push!(col::Mongoc.AbstractCollection, new_model::T) where {T<:Model}
-	new_model.createdAt = Dates.now()
-	new_model.updatedAt = Dates.now()
-	res = push!(col, Mongoc.BSON(JSON2.write(new_model, db=true)))
-	new_model._id = res.inserted_oid
+function Base.push!(col::Mongoc.AbstractCollection, new_model::model) where {model<:Model}
+	try
+		new_model.createdAt = Dates.now()
+		new_model.updatedAt = Dates.now()
+		res = push!(col, Mongoc.BSON(JSON2.write(new_model, db=true)))
+		new_model._id = res.inserted_oid
+	catch ex
+		occursin("dup key", errors.cstring_to_jstring(ex.message)) ? rethrow(errors.EntryExistsError("""$(split(lowercase(string(model)), ".")[end]) already exists""")) : rethrow(ex)
+	end
 end
 
 function Mongoc.aggregate(col::Mongoc.Collection, pipeline::Mongoc.BSON, ::Type{model}; kwargs...) where {model<:Model}

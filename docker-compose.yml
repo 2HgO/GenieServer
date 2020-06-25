@@ -3,7 +3,7 @@ version: '3'
 services:
   genie_server:
     build: .
-    command: julia --project src/main.jl
+    command: julia --warn-overwrite no --project src/main.jl
     restart: unless-stopped
     ports:
       - 55099:55099

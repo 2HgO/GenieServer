@@ -40,5 +40,13 @@ function createCategory(context::Dict{String,Any})
 end
 
 function searchCategories(context::Dict{String,Any})
-	throw(errors.NotImplementedError())
+	!haskey(context, "user") && throw(errors.PermissionError("Login to continue"))
+	
+	page::Int = parse(Int, getpayload(:page, "1"))
+	limit::Int = parse(Int, getpayload(:limit, "200"))
+	query::String = string(getpayload(:query, ""))
+	(page < 1 || limit < 1) && throw(errors.ValidationError("Invalid filter value(s)"))
+
+	categories, count = controllers.searchCategories(query, page, limit)
+	utils.ok_response(context, 200, JSON2.write(categories), message="Categories retrieved successfully", count=count)
 end

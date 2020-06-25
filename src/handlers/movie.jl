@@ -54,5 +54,13 @@ function getMovies(context::Dict{String,Any})
 end
 
 function searchMovies(context::Dict{String,Any})
-	throw(errors.NotImplementedError())
+	!haskey(context, "user") && throw(errors.PermissionError("Login to continue"))
+	
+	page::Int = parse(Int, getpayload(:page, "1"))
+	limit::Int = parse(Int, getpayload(:limit, "200"))
+	query::String = string(getpayload(:query, ""))
+	(page < 1 || limit < 1) && throw(errors.ValidationError("Invalid filter value(s)"))
+
+	movies, count = controllers.searchMovies(query, page, limit)
+	utils.ok_response(context, 200, JSON2.write(movies), message="Movies retrieved successfully", count=count)
 end

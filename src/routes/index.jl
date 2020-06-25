@@ -31,7 +31,7 @@ function merge_handlers(handlerFuncs::Tuple{Vararg{Function}}; pre::Union{Tuple{
 		ctx["method"] = matchedroute().method
 		ctx["path"] = request().target
 		ctx["name"] = matchedroute().name
-		ctx["stamp"] = Dates.now()
+		ctx["stamp"] = time_ns()
 		ctx["errors"] = Exception[]
 		length(handlerFuncs) < 1 && throw(errors.NotImplementedError("no time"))
 		if pre !== nothing
@@ -70,6 +70,13 @@ include("watchlist.jl")
 function SetupRoutes()
 	for method in [GET, POST, PUT, PATCH, DELETE]
 		route(merge_handlers((handlers.handle404,), pre=(handlers.setHeaders!, handlers.setJSONHeader!), unsafe=var().run_unsafe), ".*", method=method, named=Symbol(lowercase(method)*"_404"))
+	end
+	for rt in ["/?", "/hello/?"]
+		for method in [GET, POST, PUT, PATCH, DELETE]
+			route(rt, method=method) do
+				"Hi there, welcome to GenieServer"
+			end
+		end
 	end
 	load_routes("/users", userRoutes, pre=(handlers.setHeaders!, handlers.setJSONHeader!, handlers.userValidation!))
 	load_routes("/auth", authRoutes, pre=(handlers.setHeaders!, handlers.setJSONHeader!))

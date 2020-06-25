@@ -85,10 +85,40 @@ function getMoviesByCategory(categoryId::BSONObjectId, page::Int, limit::Int) ::
 		),
 	]
 	res::Array{models.Movie} = aggregate(db.collections.Movie, BSON(pipeline), models.Movie)
-	count::UInt = length(db.collections.Movie)
+	count::UInt = length(db.collections.Movie, BSON("categories" => categoryId))
 	return res, count
 end
 
-function serachMovies(query::String, page::Int, limit::Int) :: Tuple{Array{models.Movie}, UInt}
-	throw(errors.NotImplementedError("no time"))
+function searchMovies(query::String, page::Int, limit::Int) :: Tuple{Array{models.Movie}, UInt}
+	new_query = join(split(query), "|")
+	match = Dict(
+		"name" => Dict("\$regex" => "\\b($(new_query))", "\$options" => "i"),
+	)
+	pipeline = [
+		Dict(
+			"\$match" => match,
+		),
+		Dict(
+			"\$lookup" => Dict(
+				"from" => "categories",
+				"localField" => "categories",
+				"foreignField" => "_id",
+				"as" => "categories",
+			),
+		),
+		Dict(
+			"\$sort" => Dict(
+				"createdAt" => -1,
+			),
+		),
+		Dict(
+			"\$skip" => limit*(page - 1),
+		),
+		Dict(
+			"\$limit" => limit,
+		),
+	]
+	res::Array{models.Movie} = aggregate(db.collections.Movie, BSON(pipeline), models.Movie)
+	count::UInt = length(db.collections.Movie, BSON(match))
+	return res, count
 end

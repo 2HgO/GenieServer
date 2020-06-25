@@ -3,7 +3,7 @@ import errors.ErrorType
 import Mongoc.BSONObjectId
 import Printf.@printf
 import HTTP.Response
-import Dates: format, now
+import Dates
 
 
 const green   = "\033[97;42m"
@@ -22,6 +22,13 @@ const PATCH = "PATCH"
 const DELETE = "DELETE"
 const OPTIONS = "OPTIONS"
 const HEAD = "HEAD"
+
+const µs = Dates.Microsecond(1)
+const ms = Dates.Millisecond(1)
+const s = Dates.Second(1)
+const m = Dates.Minute(1)
+const h = Dates.Hour(1)
+const d = Dates.Day(1)
 
 function get_method_color(method)
 	if (method == GET)
@@ -55,17 +62,35 @@ function get_status_color(status)
 	end
 end
 
+function get_duration(t::UInt)
+	t_ns = Dates.Nanosecond(t)
+	if t_ns > d
+		return "$(round(t_ns, Dates.Day))"
+	elseif t_ns > h
+		return "$(round(t_ns, Dates.Hour).value)h"
+	elseif t_ns > m
+		return "$(round(t_ns, Dates.Minute).value)m"
+	elseif t_ns > s
+		return "$(round(t_ns, Dates.Second).value)s"
+	elseif t_ns > ms
+		return "$(round(t_ns, Dates.Millisecond).value)ms"
+	else
+		return "$(round(Dates.value(t_ns) * 1e-3, digits=3))µs"
+	end
+end
+
+
 function generate_log(context::Dict{String,Any}, status)
 	method = context["method"]
 	path = context["path"]
 	name = context["name"]
 	stamp = context["stamp"]
 	client = context["client"]
-	duration = (now() - stamp).value
+	duration = get_duration(time_ns() - stamp)
 	statuscol = get_status_color(status)
 	methodcol = get_method_color(method)
 
-	name, format(stamp, "Y/mm/dd - HH:MM:SS"), statuscol, status, reset, duration, client, methodcol, method, reset, path
+	name, Dates.format(Dates.now(), "Y/mm/dd - HH:MM:SS"), statuscol, status, reset, duration, client, methodcol, method, reset, path
 end
 
 function safe_bson_id(id::AbstractString) :: Tuple{Union{BSONObjectId, Nothing}, Bool}
@@ -83,12 +108,12 @@ function is_valid_email(email::String) :: Bool
 end
 
 function error_response(context::Dict{String,Any}, status::Int, message::String, error_type::ErrorType)
-	@printf "[GENIE-Error] :%25s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
+	@printf "[GENIE-Error] :%25s => %s |%s %3d %s| %9s | %15s |%s %-7s %s %s\n" generate_log(context, status)...
 	Response(status, context["headers"], body ="""{"success": false, "message": "$message", "error": "$error_type"}""")
 end
 
 function ok_response(context::Dict{String,Any}, status::Int, data::Union{String, Nothing}=nothing; message::String="", count::Union{UInt, Nothing}=nothing, token::Union{String, Nothing}=nothing)
-	@printf "[GENIE]       :%25s => %s |%s %3d %s| %7dms | %15s |%s %-7s %s %s\n" generate_log(context, status)...
+	@printf "[GENIE]       :%25s => %s |%s %3d %s| %9s | %15s |%s %-7s %s %s\n" generate_log(context, status)...
 	body = string(
 		"{",
 			"\"success\":true",

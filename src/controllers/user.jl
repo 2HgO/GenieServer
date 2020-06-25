@@ -79,13 +79,16 @@ end
 
 function searchUsers(query::String, page::Int, limit::Int) :: Tuple{Array{models.User}, UInt}
 	new_query = join(split(query), "|")
+	match = Dict(
+		"\$or" =>	[
+			Dict("firstName" => Dict("\$regex" => "^($(new_query))", "\$options" => "i")),
+			Dict("lastName" => Dict("\$regex" => "^($(new_query))", "\$options" => "i")),
+			Dict("email" => Dict("\$regex" => "^($(new_query))", "\$options" => "i")),
+		],
+	)
 	pipeline = [
 		Dict(
-			"\$match" => Dict(
-				"firstName" => Dict("\$regex" => "^($(new_query))", "\$options" => "i"),
-				"lastName" => Dict("\$regex" => "^($(new_query))", "\$options" => "i"),
-				"email" => Dict("\$regex" => "^($(new_query))", "\$options" => "i"),
-			),
+			"\$match" => match,
 		),
 		Dict(
 			"\$lookup" => Dict(
@@ -108,7 +111,7 @@ function searchUsers(query::String, page::Int, limit::Int) :: Tuple{Array{models
 		),
 	]
 	res::Array{models.User} = aggregate(db.collections.User, BSON(pipeline), models.User)
-	count::UInt = length(db.collections.User)
+	count::UInt = length(db.collections.User, BSON(match))
 	return res, count
 end
 
